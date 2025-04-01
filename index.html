@@ -1,1 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Play Lice Machine - an addictive monster survivor game where you battle endless waves of creatures to survive as long as possible!">
+  <meta name="keywords" content="lice machine, monster survivors, online game, survival game">
+  <link rel="canonical" href="https://licemachine.mom">
+  <title>Lice Machine - Monster Survival Game | Play Online Free</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            apple: {
+              blue: '#0071e3',
+              gray: '#f5f5f7',
+              darkgray: '#86868b',
+              black: '#1d1d1f',
+            }
+          }
+        }
+      }
+    }
+  </script>
 
+  <style type="text/tailwindcss">
+    body {
+      @apply font-sans text-apple-black bg-white;
+    }
+    
+    .container {
+      @apply mx-auto px-4 md:px-8 max-w-6xl;
+    }
+    
+    h1 {
+      @apply text-3xl md:text-5xl font-bold text-center my-6;
+    }
+    
+    h2 {
+      @apply text-xl md:text-2xl font-semibold mt-8 mb-4;
+    }
+    
+    p {
+      @apply text-base md:text-lg mb-4 leading-relaxed;
+    }
+    
+    .game-container {
+      @apply w-full aspect-[16/9] bg-apple-gray rounded-xl overflow-hidden shadow-lg my-6;
+      max-height: 80vh;
+    }
+    
+    .cta-button {
+      @apply bg-apple-blue hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full 
+             transition duration-300 inline-block text-center mt-4;
+    }
+    
+    .feature-card {
+      @apply bg-apple-gray p-6 rounded-xl mb-6;
+    }
+    
+    .footer {
+      @apply text-center text-apple-darkgray py-8 mt-12 border-t;
+    }
+
+    @media (max-width: 640px) {
+      .game-container {
+        height: 70vh;
+      }
+    }
+  </style>
+
+  <!-- Structured data for SEO -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "Lice Machine",
+      "description": "An addictive monster survivor game where you battle endless waves of creatures to survive as long as possible!",
+      "genre": ["Survival", "Action", "Arcade"],
+      "url": "https://licemachine.mom",
+      "playMode": "SinglePlayer",
+      "applicationCategory": "Game",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/OnlineOnly"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header class="bg-apple-gray py-4 shadow-sm">
+    <div class="container">
+      <h1 class="text-apple-black">Lice Machine</h1>
+      <p class="text-center text-xl md:text-2xl text-apple-darkgray">Battle endless waves of monsters in this addictive survival game!</p>
+    </div>
+  </header>
+
+  <main class="container py-8">
+    <section>
+      <div class="game-container">
+        <iframe 
+          src="https://cloud.onlinegames.io/games/2025/unity/monster-survivors/index-og.html" 
+          frameborder="0" 
+          allowfullscreen
+          class="w-full h-full">
+        </iframe>
+      </div>
+      
+      <div class="text-center">
+        <a href="#play-now" class="cta-button">Play Now!</a>
+      </div>
+    </section>
+
+    <section class="mt-12">
+      <h2>About Lice Machine</h2>
+      <p>Lice Machine is an exhilarating monster survivor game that puts your skills and strategy to the test. As waves of creepy creatures attack from all directions, you must navigate the battlefield, collect power-ups, and survive as long as possible. With each passing minute, the challenge intensifies, requiring quick reflexes and tactical thinking.</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div class="feature-card">
+          <h2>Game Features</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Challenging monster waves that increase in difficulty</li>
+            <li>Multiple unique characters with different abilities</li>
+            <li>Power-ups and special weapons to discover</li>
+            <li>Endless gameplay with progressive difficulty</li>
+            <li>Compete for high scores and survival time</li>
+          </ul>
+        </div>
+        
+        <div class="feature-card">
+          <h2>How to Play</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Use arrow keys or WASD to move your character</li>
+            <li>Automatically attack nearby enemies</li>
+            <li>Collect experience orbs to level up</li>
+            <li>Choose upgrades when leveling up</li>
+            <li>Survive as long as possible against endless waves</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12">
+      <h2>Game Strategy Tips</h2>
+      <p>Mastering Lice Machine requires both skill and strategy. Here are some tips to help you survive longer:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div class="bg-apple-gray p-4 rounded-lg">
+          <h3 class="font-bold text-lg mb-2">Prioritize Movement</h3>
+          <p class="text-sm">Always keep moving to avoid being surrounded. Circular patterns often work best to manage large groups of enemies.</p>
+        </div>
+        
+        <div class="bg-apple-gray p-4 rounded-lg">
+          <h3 class="font-bold text-lg mb-2">Strategic Upgrades</h3>
+          <p class="text-sm">Focus on a few powerful abilities rather than spreading upgrades across many different weapons.</p>
+        </div>
+        
+        <div class="bg-apple-gray p-4 rounded-lg">
+          <h3 class="font-bold text-lg mb-2">Resource Management</h3>
+          <p class="text-sm">Collect health pickups when you need them most, and try to pick up experience orbs efficiently.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12" id="play-now">
+      <h2>Why Play Lice Machine?</h2>
+      <p>Lice Machine offers an addictive gameplay loop that keeps you coming back for more. With its easy-to-learn but hard-to-master mechanics, you'll find yourself constantly trying to beat your previous record. The game features:</p>
+      
+      <div class="bg-apple-gray p-6 rounded-xl mt-6">
+        <ul class="space-y-2">
+          <li class="flex items-start">
+            <span class="text-apple-blue font-bold mr-2">✓</span>
+            <span>Quick gameplay sessions perfect for short breaks</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-apple-blue font-bold mr-2">✓</span>
+            <span>Challenging difficulty that scales with your skill</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-apple-blue font-bold mr-2">✓</span>
+            <span>Unique enemies and environments to discover</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-apple-blue font-bold mr-2">✓</span>
+            <span>No downloads required - play instantly in your browser</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-apple-blue font-bold mr-2">✓</span>
+            <span>Compatible with both desktop and mobile devices</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© 2023 Lice Machine. All rights reserved.</p>
+      <p class="text-sm mt-2">Lice Machine is an online survival game where players face endless waves of monsters.</p>
+    </div>
+  </footer>
+</body>
+</html> 
