@@ -437,16 +437,18 @@
                             </label>
                         </div>
                         <button type="button" class="btn-primary" id="submitOrderBtn">Submit Order</button>
-                        <!-- 弹窗提示结构 -->
-                        <div id="orderSuccessModal" class="modal" style="display:none;">
-                            <div class="modal-content">
-                                <div class="success-icon"><i class="fas fa-check-circle"></i></div>
-                                <h3>订单提交成功！</h3>
-                                <p>感谢您的订购，我们将尽快与您联系。</p>
-                                <button class="btn-primary close-modal">确定</button>
-                                <span class="close-modal close-x">&times;</span>
-                            </div>
-                        </div>
+                        <script>
+                        document.getElementById('purchaseForm').addEventListener('submit', function(event) {
+                            var name = document.getElementById('name').value.trim();
+                            var phone = document.getElementById('phone').value.trim();
+                            var email = document.getElementById('email').value.trim();
+                            if (!name || !phone || !email) {
+                                alert('Please fill in Name, Phone and Email.');
+                                event.preventDefault();
+                                return false;
+                            }
+                        });
+                        </script>
                         <!-- 成功提交后会显示上方的成功消息 -->
                     </form>
                 </div>
@@ -513,5 +515,6 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="order-success.js"></script>
 </body>
 </html>
