@@ -438,24 +438,53 @@
                         </div>
                         <button type="button" class="btn-primary" id="submitOrderBtn">Submit Order</button>
                         <script>
-                        document.getElementById('purchaseForm').addEventListener('submit', function(event) {
+                        document.getElementById('submitOrderBtn').addEventListener('click', function() {
                             var name = document.getElementById('name').value.trim();
                             var phone = document.getElementById('phone').value.trim();
                             var email = document.getElementById('email').value.trim();
+                            var product = document.getElementById('product').value.trim();
+                            
                             if (!name || !phone || !email) {
                                 alert('Please fill in Name, Phone and Email.');
-                                event.preventDefault();
                                 return false;
                             }
+                            
+                            if (!product) {
+                                alert('Please select a product package.');
+                                return false;
+                            }
+                            
+                            // If validation passes, show success modal
+                            document.getElementById('orderSuccessModal').style.display = 'flex';
+                            
+                            // Optional: scroll to make modal visible
+                            window.scrollTo({
+                                top: document.getElementById('orderSuccessModal').offsetTop - 100,
+                                behavior: 'smooth'
+                            });
+                        });
+                        
+                        // Add event handler to close modal
+                        document.querySelector('.close-modal').addEventListener('click', function() {
+                            document.getElementById('orderSuccessModal').style.display = 'none';
                         });
                         </script>
-                        <!-- 成功提交后会显示上方的成功消息 -->
+                        <!-- Success message will be displayed after submission -->
                     </form>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Order Success Modal -->
+    <div id="orderSuccessModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+        <div class="modal-content" style="background-color:#fff; border-radius:5px; padding:30px; max-width:500px; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.3); font-family:inherit;">
+            <div class="success-icon" style="font-size:60px; color:#3498db; margin-bottom:20px;"><i class="fas fa-check-circle"></i></div>
+            <h3 style="margin-top:0; color:#333; font-size:22px; font-weight:600;">Thank you for your order!</h3>
+            <p style="color:#666; margin-bottom:25px; font-size:16px;">We will contact you shortly.</p>
+            <button class="btn-primary close-modal" style="background-color:#3498db; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-size:16px;">OK</button>
+        </div>
+    </div>
     <!-- User Guide Video Section -->
     <section id="user-guide" class="user-guide">
         <div class="container">
