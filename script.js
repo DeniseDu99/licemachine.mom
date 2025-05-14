@@ -1,23 +1,46 @@
 // 应用管理后台保存的设置函数
 // 将函数设为全局可访问，以便管理后台可以调用
-window.applyAdminSettings = function() {
-    console.log('应用管理后台设置'); // 添加调试信息
+window.applyAdminSettings = function(forceReload = false) {
+    console.log('应用管理后台设置 - 开始'); // 添加调试信息
     // 从localStorage获取保存的设置
     const savedSettings = localStorage.getItem('websiteSettings');
     const savedContactSettings = localStorage.getItem('contactSettings');
+    const savedMediaFiles = localStorage.getItem('mediaFiles');
+    const lastUpdated = localStorage.getItem('settingsLastUpdated');
+    
+    // 如果需要强制重新加载内容
+    if (forceReload) {
+        window.forceReloadBlog = true;
+        window.forceReloadMedia = true;
+        console.log('设置强制重新加载内容标志');
+    }
+    
+    console.log('设置最后更新时间:', lastUpdated);
     
     if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        console.log('应用网站设置:', settings); // 添加调试信息
-        
-        // 应用基本设置
-        if (settings.siteName) {
-            document.title = settings.siteName;
-            const logoElements = document.querySelectorAll('.logo h1, .footer-logo h2');
-            logoElements.forEach(el => {
-                if (el) el.textContent = settings.siteName;
-            });
+        try {
+            const settings = JSON.parse(savedSettings);
+            console.log('应用网站设置:', settings); // 添加调试信息
+        } catch (error) {
+            console.error('解析网站设置时出错:', error);
+            return; // 如果解析失败，退出函数
         }
+        
+        try {
+            const settings = JSON.parse(savedSettings); // 重新解析一次
+            
+            // 应用基本设置
+            if (settings.siteName) {
+                document.title = settings.siteName;
+                const logoElements = document.querySelectorAll('.logo h1, .footer-logo h2');
+                console.log('找到logo元素:', logoElements.length);
+                logoElements.forEach(el => {
+                    if (el) {
+                        el.textContent = settings.siteName;
+                        console.log('已更新logo文本为:', settings.siteName);
+                    }
+                });
+            }
         
         // 应用SEO设置
         if (settings.metaDescription) {
@@ -26,8 +49,22 @@ window.applyAdminSettings = function() {
                 metaDescription = document.createElement('meta');
                 metaDescription.name = 'description';
                 document.head.appendChild(metaDescription);
+                console.log('创建了新的meta description标签');
             }
             metaDescription.content = settings.metaDescription;
+            console.log('已更新meta description为:', settings.metaDescription);
+        }
+        
+        if (settings.metaKeywords) {
+            let metaKeywords = document.querySelector('meta[name="keywords"]');
+            if (!metaKeywords) {
+                metaKeywords = document.createElement('meta');
+                metaKeywords.name = 'keywords';
+                document.head.appendChild(metaKeywords);
+                console.log('创建了新的meta keywords标签');
+            }
+            metaKeywords.content = settings.metaKeywords;
+            console.log('已更新meta keywords为:', settings.metaKeywords);
         }
         
         // 应用颜色设置
@@ -37,6 +74,7 @@ window.applyAdminSettings = function() {
                 styleElement = document.createElement('style');
                 styleElement.id = 'dynamic-styles';
                 document.head.appendChild(styleElement);
+                console.log('创建了新的动态样式元素');
             }
             
             let cssRules = '';
@@ -49,6 +87,7 @@ window.applyAdminSettings = function() {
                         color: ${settings.primaryColor};
                     }
                 `;
+                console.log('应用主色调:', settings.primaryColor);
             }
             
             if (settings.secondaryColor) {
@@ -57,6 +96,7 @@ window.applyAdminSettings = function() {
                         background-color: ${settings.secondaryColor};
                     }
                 `;
+                console.log('应用次要色调:', settings.secondaryColor);
             }
             
             styleElement.textContent = cssRules;
@@ -65,46 +105,72 @@ window.applyAdminSettings = function() {
         // 应用字体设置
         if (settings.fontFamily) {
             document.body.style.fontFamily = settings.fontFamily;
+            console.log('应用字体设置:', settings.fontFamily);
         }
     }
     
     // 应用联系方式设置
     if (savedContactSettings) {
-        const contactSettings = JSON.parse(savedContactSettings);
-        console.log('应用联系方式设置:', contactSettings); // 添加调试信息
-        
-        const contactElements = document.querySelectorAll('.contact-info .info-item');
-        contactElements.forEach(item => {
-            const icon = item.querySelector('i');
-            if (!icon) return;
+        try {
+            const contactSettings = JSON.parse(savedContactSettings);
+            console.log('应用联系方式设置:', contactSettings); // 添加调试信息
             
-            if (icon.classList.contains('fa-envelope') && contactSettings.email) {
-                const emailElement = item.querySelector('p');
-                if (emailElement) emailElement.textContent = contactSettings.email;
-            } else if (icon.classList.contains('fa-phone') && contactSettings.phone) {
-                const phoneElement = item.querySelector('p');
-                if (phoneElement) phoneElement.textContent = contactSettings.phone;
-            } else if (icon.classList.contains('fa-map-marker-alt') && contactSettings.address) {
-                const addressElement = item.querySelector('p');
-                if (addressElement) addressElement.textContent = contactSettings.address;
+            const contactElements = document.querySelectorAll('.contact-info .info-item');
+            console.log('找到联系信息元素:', contactElements.length);
+            
+            contactElements.forEach(item => {
+                const icon = item.querySelector('i');
+                if (!icon) return;
+                
+                if (icon.classList.contains('fa-envelope') && contactSettings.email) {
+                    const emailElement = item.querySelector('p');
+                    if (emailElement) {
+                        emailElement.textContent = contactSettings.email;
+                        console.log('已更新邮箱为:', contactSettings.email);
+                    }
+                } else if (icon.classList.contains('fa-phone') && contactSettings.phone) {
+                    const phoneElement = item.querySelector('p');
+                    if (phoneElement) {
+                        phoneElement.textContent = contactSettings.phone;
+                        console.log('已更新电话为:', contactSettings.phone);
+                    }
+                } else if (icon.classList.contains('fa-map-marker-alt') && contactSettings.address) {
+                    const addressElement = item.querySelector('p');
+                    if (addressElement) {
+                        addressElement.textContent = contactSettings.address;
+                        console.log('已更新地址为:', contactSettings.address);
+                    }
+                }
+            });
+            
+            // 更新社交媒体链接
+            const socialLinks = document.querySelectorAll('.social-links a');
+            console.log('找到社交媒体链接:', socialLinks.length);
+            
+            if (socialLinks.length > 0 && contactSettings.facebook) {
+                socialLinks[0].href = contactSettings.facebook;
+                console.log('已更新Facebook链接为:', contactSettings.facebook);
             }
-        });
-        
-        // 更新社交媒体链接
-        const socialLinks = document.querySelectorAll('.social-links a');
-        if (socialLinks.length > 0 && contactSettings.facebook) {
-            socialLinks[0].href = contactSettings.facebook;
+            if (socialLinks.length > 1 && contactSettings.twitter) {
+                socialLinks[1].href = contactSettings.twitter;
+                console.log('已更新Twitter链接为:', contactSettings.twitter);
+            }
+            if (socialLinks.length > 2 && contactSettings.instagram) {
+                socialLinks[2].href = contactSettings.instagram;
+                console.log('已更新Instagram链接为:', contactSettings.instagram);
+            }
+            if (socialLinks.length > 3 && contactSettings.linkedin) {
+                socialLinks[3].href = contactSettings.linkedin;
+                console.log('已更新LinkedIn链接为:', contactSettings.linkedin);
+            }
+        } catch (error) {
+            console.error('应用联系方式设置时出错:', error);
         }
-        if (socialLinks.length > 1 && contactSettings.twitter) {
-            socialLinks[1].href = contactSettings.twitter;
-        }
-        if (socialLinks.length > 2 && contactSettings.instagram) {
-            socialLinks[2].href = contactSettings.instagram;
-        }
-        if (socialLinks.length > 3 && contactSettings.linkedin) {
-            socialLinks[3].href = contactSettings.linkedin;
-        }
+    } else {
+        console.log('未找到保存的联系方式设置');
     }
+    
+    console.log('应用管理后台设置 - 完成');
     
     // 更新T/T支付信息
     updateTTPaymentInfo();
@@ -112,6 +178,11 @@ window.applyAdminSettings = function() {
     // 加载博客文章（如果在博客页面）
     if (window.location.pathname.includes('blog.html')) {
         loadBlogPosts();
+    }
+    
+    // 加载媒体文件（如果有更新）
+    if (window.forceReloadMedia || localStorage.getItem('mediaUpdated') === 'true') {
+        loadMediaFiles();
     }
 }
 
@@ -135,7 +206,10 @@ function updateTTPaymentInfo() {
 function loadBlogPosts() {
     console.log('加载博客文章'); // 添加调试信息
     const blogGrid = document.querySelector('.blog-grid');
-    if (!blogGrid) return;
+    if (!blogGrid) {
+        console.log('未找到博客网格元素，可能不在博客页面');
+        return;
+    }
     
     // 从localStorage获取博客数据
     const savedBlogs = localStorage.getItem('blogPosts');
@@ -144,57 +218,296 @@ function loadBlogPosts() {
         return;
     }
     
-    const blogPosts = JSON.parse(savedBlogs);
-    console.log('找到博客文章:', blogPosts.length);
-    
-    // 清空现有的博客卡片（保留前4个默认卡片）
-    const existingCards = blogGrid.querySelectorAll('.blog-card');
-    const defaultCardsCount = Math.min(existingCards.length, 4);
+    try {
+        const blogPosts = JSON.parse(savedBlogs);
+        console.log('找到博客文章:', blogPosts.length);
+        
+        // 检查是否有博客更新标志
+        const blogUpdated = localStorage.getItem('blogUpdated');
+        console.log('博客更新状态:', blogUpdated);
+        
+        // 清除现有的管理员添加的博客卡片
+        const existingAdminCards = blogGrid.querySelectorAll('.admin-blog-card');
+        if (existingAdminCards.length > 0) {
+            console.log('清除现有的管理员添加的博客卡片:', existingAdminCards.length);
+            existingAdminCards.forEach(card => card.remove());
+        }
+        
+        // 强制重新加载的条件：
+        // 1. 有博客更新标志
+        // 2. 强制重新加载标志被设置
+        // 3. 没有现有的博客卡片
+        if (blogUpdated !== 'true' && existingAdminCards.length > 0 && !window.forceReloadBlog) {
+            console.log('博客内容没有更新，无需重新加载');
+            return;
+        }
+        console.log('正在重新加载博客内容...');
+        
+        // 保留原始的默认博客卡片（如果有）
+        const defaultCards = blogGrid.querySelectorAll('.blog-card:not(.admin-blog-card)');
+        console.log('保留默认博客卡片数量:', defaultCards.length);
     
     // 添加新的博客卡片
     blogPosts.forEach((blog, index) => {
-        // 创建博客卡片
-        const blogCard = document.createElement('div');
-        blogCard.className = 'blog-card';
-        
-        // 格式化日期
-        let publishDate = '最近发布';
-        if (blog.publishDate) {
-            const date = new Date(blog.publishDate);
-            publishDate = date.toLocaleDateString('zh-CN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-        
-        // 设置博客卡片内容
-        blogCard.innerHTML = `
-            <div class="blog-image">
-                <img src="images/blog${(index % 4) + 1}.svg" alt="${blog.blogTitle}">
-            </div>
-            <div class="blog-content">
-                <div class="blog-date">
-                    <i class="far fa-calendar-alt"></i> ${publishDate}
+        try {
+            // 创建博客卡片
+            const blogCard = document.createElement('div');
+            blogCard.className = 'blog-card admin-blog-card';
+            
+            // 格式化日期
+            let publishDate = '最近发布';
+            if (blog.publishDate) {
+                const date = new Date(blog.publishDate);
+                publishDate = date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+            
+            // 设置图片路径
+            let imagePath = '';
+            if (blog.imageUrl) {
+                // 如果有上传的图片URL
+                imagePath = blog.imageUrl;
+            } else {
+                // 使用默认图片
+                imagePath = `images/blog${(index % 4) + 1}.svg`;
+            }
+            
+            // 设置博客卡片内容
+            blogCard.innerHTML = `
+                <div class="blog-image">
+                    <img src="${imagePath}" alt="${blog.blogTitle || '博客文章'}">
                 </div>
-                <h3><a href="#">${blog.blogTitle}</a></h3>
-                <p>${blog.blogExcerpt}</p>
-                <a href="#" class="read-more">阅读更多 <i class="fas fa-arrow-right"></i></a>
-            </div>
-        `;
+                <div class="blog-content">
+                    <div class="blog-date">
+                        <i class="far fa-calendar-alt"></i> ${publishDate}
+                    </div>
+                    <h3><a href="#">${blog.blogTitle || '无标题文章'}</a></h3>
+                    <p>${blog.blogExcerpt || '暂无摘要'}</p>
+                    <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+            `;
+            
+            // 将博客卡片添加到网格中
+            blogGrid.appendChild(blogCard);
+            console.log('已添加博客文章:', blog.blogTitle);
+        } catch (error) {
+            console.error('添加博客文章时出错:', error, blog);
+        }
+    });
+    
+    // 重置博客更新标志
+    if (localStorage.getItem('blogUpdated') === 'true') {
+        localStorage.setItem('blogUpdated', 'false');
+        console.log('已重置博客更新标志');
+    }
+    
+    // 清除强制重新加载标志
+    window.forceReloadBlog = false;
+    console.log('博客加载完成');
+} catch (error) {
+    console.error('加载博客文章时出错:', error);
+}
+}
+}
+
+// 同步管理后台设置到前端的辅助函数
+window.syncAdminSettings = function(forceReload = true) {
+    console.log('手动同步管理后台设置');
+    // 设置更新标志
+    localStorage.setItem('settingsUpdated', 'true');
+    
+    // 检查是否有博客更新
+    if (localStorage.getItem('blogPosts')) {
+        localStorage.setItem('blogUpdated', 'true');
+        console.log('检测到博客内容更新，设置更新标志');
+    }
+    
+    // 检查是否有媒体文件更新
+    if (localStorage.getItem('mediaFiles')) {
+        localStorage.setItem('mediaUpdated', 'true');
+        console.log('检测到媒体文件更新，设置更新标志');
+    }
+    
+    // 记录最后更新时间
+    localStorage.setItem('settingsLastUpdated', new Date().toISOString());
+    console.log('更新时间已记录:', new Date().toISOString());
+    
+    // 强制应用设置
+    applyAdminSettings(forceReload);
+    return '设置已同步';
+};
+
+// 加载媒体文件
+function loadMediaFiles() {
+    console.log('加载媒体文件'); // 添加调试信息
+    
+    // 从localStorage获取媒体数据
+    const savedMedia = localStorage.getItem('mediaFiles');
+    if (!savedMedia) {
+        console.log('没有找到保存的媒体文件');
+        return;
+    }
+    
+    try {
+        const mediaFiles = JSON.parse(savedMedia);
+        console.log('找到媒体文件:', mediaFiles.length);
         
-        // 将博客卡片添加到网格中
-        blogGrid.appendChild(blogCard);
+        // 更新网站中的媒体文件引用
+        // 例如：更新轮播图、产品图片等
+        updateCarouselImages(mediaFiles);
+        updateProductImages(mediaFiles);
+        
+        // 清除媒体更新标志
+        window.forceReloadMedia = false;
+        console.log('媒体文件加载完成');
+    } catch (error) {
+        console.error('加载媒体文件时出错:', error);
+    }
+}
+
+// 更新轮播图
+function updateCarouselImages(mediaFiles) {
+    // 查找轮播图元素
+    const carouselItems = document.querySelectorAll('.carousel-item img');
+    if (carouselItems.length === 0) {
+        console.log('未找到轮播图元素');
+        return;
+    }
+    
+    // 筛选出轮播图类型的媒体文件
+    const carouselMedia = mediaFiles.filter(media => media.type === 'carousel');
+    if (carouselMedia.length === 0) {
+        console.log('没有轮播图类型的媒体文件');
+        return;
+    }
+    
+    console.log('更新轮播图:', carouselMedia.length);
+    
+    // 更新轮播图
+    carouselItems.forEach((item, index) => {
+        if (index < carouselMedia.length && carouselMedia[index].url) {
+            item.src = carouselMedia[index].url;
+            console.log('已更新轮播图:', index, carouselMedia[index].url);
+        }
     });
 }
 
+// 更新产品图片
+function updateProductImages(mediaFiles) {
+    // 查找产品图片元素
+    const productImages = document.querySelectorAll('.product-item img, .product-image img');
+    if (productImages.length === 0) {
+        console.log('未找到产品图片元素');
+        return;
+    }
+    
+    // 筛选出产品类型的媒体文件
+    const productMedia = mediaFiles.filter(media => media.type === 'product');
+    if (productMedia.length === 0) {
+        console.log('没有产品类型的媒体文件');
+        return;
+    }
+    
+    console.log('更新产品图片:', productMedia.length);
+    
+    // 更新产品图片
+    productImages.forEach((item, index) => {
+        if (index < productMedia.length && productMedia[index].url) {
+            item.src = productMedia[index].url;
+            console.log('已更新产品图片:', index, productMedia[index].url);
+        }
+    });
+}
+
+// 检查是否有内容更新的函数
+function checkForContentUpdates() {
+    console.log('检查内容更新...');
+    
+    // 获取上次检查时间
+    const lastCheck = localStorage.getItem('lastUpdateCheck');
+    const now = new Date().toISOString();
+    
+    // 如果是首次检查或距离上次检查已超过5分钟，则进行检查
+    if (!lastCheck || (new Date(now) - new Date(lastCheck)) > 5 * 60 * 1000) {
+        console.log('执行定期内容更新检查');
+        
+        // 检查设置更新
+        const lastSettingsUpdate = localStorage.getItem('settingsLastUpdated');
+        if (lastSettingsUpdate && (!lastCheck || new Date(lastSettingsUpdate) > new Date(lastCheck))) {
+            console.log('检测到设置有更新，设置更新标志');
+            localStorage.setItem('settingsUpdated', 'true');
+        }
+        
+        // 检查博客更新
+        const lastBlogUpdate = localStorage.getItem('blogLastUpdated');
+        if (lastBlogUpdate && (!lastCheck || new Date(lastBlogUpdate) > new Date(lastCheck))) {
+            console.log('检测到博客有更新，设置更新标志');
+            localStorage.setItem('blogUpdated', 'true');
+        }
+        
+        // 检查媒体文件更新
+        const lastMediaUpdate = localStorage.getItem('mediaLastUpdated');
+        if (lastMediaUpdate && (!lastCheck || new Date(lastMediaUpdate) > new Date(lastCheck))) {
+            console.log('检测到媒体文件有更新，设置更新标志');
+            localStorage.setItem('mediaUpdated', 'true');
+        }
+        
+        // 更新最后检查时间
+        localStorage.setItem('lastUpdateCheck', now);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    // 应用管理后台保存的设置
-    applyAdminSettings();
+    // 检查是否有内容更新
+    checkForContentUpdates();
+    
+    // 检查是否有设置更新标志，并应用管理后台保存的设置
+    const settingsUpdated = localStorage.getItem('settingsUpdated');
+    console.log('设置更新状态:', settingsUpdated);
+    
+    // 检查是否有博客更新标志
+    const blogUpdated = localStorage.getItem('blogUpdated');
+    console.log('博客更新状态:', blogUpdated);
+    
+    // 检查是否有媒体文件更新标志
+    const mediaUpdated = localStorage.getItem('mediaUpdated');
+    console.log('媒体更新状态:', mediaUpdated);
+    
+    // 确定是否需要强制重新加载
+    const forceReload = settingsUpdated === 'true' || blogUpdated === 'true' || mediaUpdated === 'true';
+    
+    // 无论如何都应用设置，确保每次页面加载时都应用最新设置
+    applyAdminSettings(forceReload);
+    
+    // 如果有设置更新标志，清除它
+    if (settingsUpdated === 'true') {
+        console.log('检测到设置已更新，应用新设置');
+        localStorage.setItem('settingsUpdated', 'false');
+    }
+    
+    // 如果有媒体更新标志，清除它
+    if (mediaUpdated === 'true') {
+        console.log('检测到媒体文件已更新，应用新媒体');
+        localStorage.setItem('mediaUpdated', 'false');
+    }
+    
+    // 设置定期检查更新（每分钟检查一次）
+    setInterval(checkForContentUpdates, 60000);
+    
+    // 检查当前页面是否为博客页面，并加载博客文章
+    const currentPath = window.location.pathname;
+    if (currentPath.endsWith('blog.html') || currentPath.includes('/blog.html')) {
+        console.log('当前在博客页面，主动加载博客文章');
+        // 博客页面不需要再次调用loadBlogPosts，因为applyAdminSettings已经调用了
+    }
     
     // Submit Order button functionality
     const submitOrderBtn = document.getElementById('submitOrderBtn');
     const purchaseForm = document.getElementById('purchaseForm');
+
     
     if (submitOrderBtn && purchaseForm) {
         console.log('找到提交按钮和表单元素'); // 添加调试信息
@@ -301,10 +614,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 quantity: quantity,
                 message: document.getElementById('message').value,
                 isDistributor: document.getElementById('agent').checked,
-                paymentMethod: document.getElementById('payment_method').checked ? 'T/T Payment' : 'Other'
+                paymentMethod: document.getElementById('payment_method').checked ? 'T/T Payment' : 'Other',
+                timestamp: new Date().toISOString(),
+                status: 'new'
             };
             
             console.log('准备发送到后台的数据:', formData);
+            
+            // 保存留言数据到localStorage
+            saveCustomerMessage(formData);
             
             // 显示成功消息
             const orderSuccessModal = document.getElementById('orderSuccessModal');
@@ -363,6 +681,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // 不再显示额外的弹窗表单
             // 数据已经收集并准备好发送到后台
         };
+        
+        // 保存客户留言到localStorage
+        function saveCustomerMessage(messageData) {
+            // 从localStorage获取现有留言
+            let customerMessages = [];
+            const savedMessages = localStorage.getItem('customerMessages');
+            
+            if (savedMessages) {
+                customerMessages = JSON.parse(savedMessages);
+            }
+            
+            // 添加新留言
+            customerMessages.push(messageData);
+            
+            // 保存回localStorage
+            localStorage.setItem('customerMessages', JSON.stringify(customerMessages));
+            console.log('客户留言已保存到localStorage');
+        }
     } else {
         console.error('未找到提交按钮或表单元素'); // 添加错误信息
     }
@@ -713,9 +1049,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .success-icon {
-            font-size: 60px;
+            font-size: 48px;
             color: #2ecc71;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            font-family: 'Arial', sans-serif;
         }
         
         .close-modal {
