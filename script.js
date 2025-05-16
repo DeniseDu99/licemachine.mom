@@ -1,3 +1,178 @@
+// 表单提交处理
+document.addEventListener('DOMContentLoaded', function() {
+    const purchaseForm = document.getElementById('purchaseForm');
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                address: document.getElementById('address').value,
+                product: document.getElementById('product').value
+            };
+
+            // 显示成功提示
+            alert('订单提交成功！我们将尽快与您联系。');
+            
+            // 清空表单
+            purchaseForm.reset();
+        });
+    }
+
+    // 初始化国际电话输入插件
+    const phoneInput = document.querySelector("#phone");
+    let iti;
+    
+    if (phoneInput) {
+        iti = window.intlTelInput(phoneInput, {
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/utils.js",
+            separateDialCode: true,
+            autoPlaceholder: "polite",
+            preferredCountries: ["cn", "us", "gb"],
+            formatOnDisplay: true
+        });
+
+        // 添加电话号码格式化和验证
+        phoneInput.addEventListener("blur", function() {
+            const phoneError = document.getElementById('phone-error');
+            
+            if (phoneInput.value.trim()) {
+                if (iti.isValidNumber()) {
+                    // 格式化显示，添加空格以提高可读性
+                    phoneInput.value = formatPhoneNumber(iti.getNumber());
+                    phoneInput.classList.add('formatted');
+                    phoneError.classList.remove('show');
+                } else {
+                    phoneError.textContent = '请输入有效的电话号码';
+                    phoneError.classList.add('show');
+                }
+            } else {
+                phoneError.classList.remove('show');
+            }
+        });
+    }
+    
+    // 格式化电话号码函数，添加空格提高可读性
+    function formatPhoneNumber(phoneNumber) {
+        // 保留国家代码和区号，为本地号码添加空格
+        // 例如 +86 138 1234 5678
+        return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})$/, "$1 $2 $3");
+    }
+
+    // 初始化电子邮件验证
+    const emailInput = document.querySelector("#email");
+    if (emailInput) {
+        emailInput.addEventListener("blur", function() {
+            const emailError = document.getElementById('email-error');
+            const email = emailInput.value.trim();
+            
+            if (email) {
+                // 使用HTML5内置验证和正则表达式验证Email
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                
+                if (emailPattern.test(email)) {
+                    emailError.classList.remove('show');
+                } else {
+                    emailError.textContent = '请输入有效的电子邮件地址';
+                    emailError.classList.add('show');
+                }
+            } else {
+                emailError.classList.remove('show');
+            }
+        });
+    }
+
+    // 表单提交处理
+    const purchaseForm = document.getElementById('purchaseForm');
+    const submitOrderBtn = document.getElementById('submitOrderBtn');
+    
+    if (purchaseForm && submitOrderBtn) {
+        submitOrderBtn.addEventListener('click', function() {
+            // 获取表单数据
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const product = document.getElementById('product').value.trim();
+            
+            // 前端验证
+            let isValid = true;
+            
+            if (!name) {
+                isValid = false;
+            }
+            
+            // 验证电话号码
+            if (phoneInput && iti && !phone) {
+                const phoneError = document.getElementById('phone-error');
+                phoneError.textContent = '请输入电话号码';
+                phoneError.classList.add('show');
+                isValid = false;
+            } else if (phoneInput && iti && !iti.isValidNumber()) {
+                const phoneError = document.getElementById('phone-error');
+                phoneError.textContent = '请输入有效的电话号码';
+                phoneError.classList.add('show');
+                isValid = false;
+            }
+            
+            // 验证电子邮件
+            if (!email) {
+                const emailError = document.getElementById('email-error');
+                emailError.textContent = '请输入电子邮件地址';
+                emailError.classList.add('show');
+                isValid = false;
+            } else if (emailInput) {
+                const emailError = document.getElementById('email-error');
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                
+                if (!emailPattern.test(email)) {
+                    emailError.textContent = '请输入有效的电子邮件地址';
+                    emailError.classList.add('show');
+                    isValid = false;
+                }
+            }
+            
+            if (!product) {
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                alert('请填写必填字段并确保格式正确');
+                return false;
+            }
+
+            // 显示成功提示
+            document.getElementById('orderSuccessModal').style.display = 'flex';
+            
+            // 可选: 滚动以使模态框可见
+            window.scrollTo({
+                top: document.getElementById('orderSuccessModal').offsetTop - 100,
+                behavior: 'smooth'
+            });
+            
+            // 清空表单
+            purchaseForm.reset();
+        });
+        
+        // 添加事件处理程序关闭模态框
+        const closeButton = document.querySelector('.close-modal');
+        if (closeButton) {
+            closeButton.addEventListener('click', function() {
+                document.getElementById('orderSuccessModal').style.display = 'none';
+            });
+        }
+    }
+
+    // 原有的加载博客文章功能
+    try {
+        loadBlogPosts();
+    } catch (error) {
+        console.error('加载博客文章时出错:', error);
+    }
+});
+
 // 应用管理后台保存的设置函数
 // 将函数设为全局可访问，以便管理后台可以调用
 window.applyAdminSettings = function(forceReload = false) {
@@ -307,10 +482,6 @@ function loadBlogPosts() {
     // 清除强制重新加载标志
     window.forceReloadBlog = false;
     console.log('博客加载完成');
-} catch (error) {
-    console.error('加载博客文章时出错:', error);
-}
-}
 }
 
 // 同步管理后台设置到前端的辅助函数
@@ -504,207 +675,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 博客页面不需要再次调用loadBlogPosts，因为applyAdminSettings已经调用了
     }
     
-    // Submit Order button functionality
-    const submitOrderBtn = document.getElementById('submitOrderBtn');
-    const purchaseForm = document.getElementById('purchaseForm');
-
-    
-    if (submitOrderBtn && purchaseForm) {
-        console.log('找到提交按钮和表单元素'); // 添加调试信息
-        
-        // 确保只添加一次事件监听器
-        submitOrderBtn.onclick = null;
-        
-        // 添加新的事件监听器
-        submitOrderBtn.onclick = function() {
-            console.log('提交订单按钮被点击'); // 添加调试信息
-            
-            // 基本表单验证
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const address = document.getElementById('address').value.trim();
-            const product = document.getElementById('product').value;
-            const quantity = document.getElementById('quantity').value;
-            
-            console.log('表单数据:', { name, phone, email, address, product, quantity }); // 添加调试信息
-            
-            // 验证必填字段
-            let isValid = true;
-            
-            // 清除所有字段的错误提示
-            const formFields = ['name', 'phone', 'email', 'address', 'product'];
-            formFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    removeFieldError(field);
-                    field.style.borderColor = '#ddd';
-                }
-            });
-            
-            // 验证姓名
-            const nameField = document.getElementById('name');
-            if (!name) {
-                nameField.style.borderColor = '#e74c3c';
-                showFieldError(nameField, 'Name is required');
-                isValid = false;
-            }
-            
-            // 验证联系方式
-            const phoneField = document.getElementById('phone');
-            if (!phone) {
-                phoneField.style.borderColor = '#e74c3c';
-                showFieldError(phoneField, 'Phone number is required');
-                isValid = false;
-            } else {
-                // 使用更宽松的电话号码验证，支持国际格式
-                const phoneRegex = /^\+?(\d{1,4}[\s\-\.\,]?)?(\(?\d{1,6}\)?)?([\s\-\.\,]?\d{1,5}){1,4}$/;
-                if (!phoneRegex.test(phone)) {
-                    phoneField.style.borderColor = '#e74c3c';
-                    showFieldError(phoneField, 'Invalid phone number');
-                    isValid = false;
-                }
-            }
-            
-            // 验证邮箱
-            const emailField = document.getElementById('email');
-            if (!email) {
-                emailField.style.borderColor = '#e74c3c';
-                showFieldError(emailField, 'Email is required');
-                isValid = false;
-            } else {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    emailField.style.borderColor = '#e74c3c';
-                    showFieldError(emailField, 'Invalid email address');
-                    isValid = false;
-                }
-            }
-            
-            // 验证收货地址
-            const addressField = document.getElementById('address');
-            if (!address) {
-                addressField.style.borderColor = '#e74c3c';
-                showFieldError(addressField, 'Shipping address is required');
-                isValid = false;
-            }
-            
-            // 验证产品选择
-            const productField = document.getElementById('product');
-            if (!product) {
-                productField.style.borderColor = '#e74c3c';
-                showFieldError(productField, 'Please select a product');
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                console.log('表单验证失败'); // 添加调试信息
-                return;
-            }
-            
-            console.log('表单验证通过，显示成功信息'); // 添加调试信息
-            
-            // 收集表单数据，可以在这里添加发送到后台的代码
-            const formData = {
-                name: name,
-                phone: phone,
-                email: email,
-                address: address,
-                product: product,
-                quantity: quantity,
-                message: document.getElementById('message').value,
-                isDistributor: document.getElementById('agent').checked,
-                paymentMethod: document.getElementById('payment_method').checked ? 'T/T Payment' : 'Other',
-                timestamp: new Date().toISOString(),
-                status: 'new'
-            };
-            
-            console.log('准备发送到后台的数据:', formData);
-            
-            // 保存留言数据到localStorage
-            saveCustomerMessage(formData);
-            
-            // 显示成功消息
-            const orderSuccessModal = document.getElementById('orderSuccessModal');
-            if (orderSuccessModal) {
-                // 修改模态框内容为英文
-                orderSuccessModal.innerHTML = `
-                    <div class="modal-content">
-                        <div class="success-icon"><i class="fas fa-check-circle"></i></div>
-                        <h3>Thank you for your order!</h3>
-                        <p>We will contact you as soon as possible.</p>
-                        <button class="btn-primary close-modal">OK</button>
-                    </div>
-                `;
-                
-                // 显示模态框
-                orderSuccessModal.style.display = 'block';
-                console.log('显示成功提示模态框'); // 添加调试信息
-                
-                // 添加发送数据到后台的逻辑
-                fetch('https://api.example.com/submit-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // 可添加错误处理
-                });
-                
-                // 更新按钮状态
-                submitOrderBtn.innerHTML = 'Submitted <i class="fas fa-check"></i>';
-                submitOrderBtn.style.backgroundColor = '#2ecc71';
-                submitOrderBtn.disabled = true;
-                
-                // 关闭模态框处理
-                const closeModal = orderSuccessModal.querySelector('.close-modal');
-                closeModal.onclick = function() {
-                    orderSuccessModal.style.display = 'none';
-                    purchaseForm.reset();
-                    submitOrderBtn.innerHTML = 'Submit Order';
-                    submitOrderBtn.style.backgroundColor = '';
-                    submitOrderBtn.disabled = false;
-                };
-            } else {
-                console.error('未找到成功提示模态框元素'); // 添加错误信息
-                // 如果模态框不存在，至少提供一些反馈
-                alert('Order submitted successfully! We will contact you soon.');
-            }
-            
-            // 不再显示额外的弹窗表单
-            // 数据已经收集并准备好发送到后台
-        };
-        
-        // 保存客户留言到localStorage
-        function saveCustomerMessage(messageData) {
-            // 从localStorage获取现有留言
-            let customerMessages = [];
-            const savedMessages = localStorage.getItem('customerMessages');
-            
-            if (savedMessages) {
-                customerMessages = JSON.parse(savedMessages);
-            }
-            
-            // 添加新留言
-            customerMessages.push(messageData);
-            
-            // 保存回localStorage
-            localStorage.setItem('customerMessages', JSON.stringify(customerMessages));
-            console.log('客户留言已保存到localStorage');
-        }
-    } else {
-        console.error('未找到提交按钮或表单元素'); // 添加错误信息
-    }
-    
-    // 表单提交逻辑已在上方完成，不再需要额外的弹窗表单处理代码
-
     // 移动菜单切换
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const body = document.body;
@@ -749,35 +719,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // FAQ 折叠功能
-    const faqItems = document.querySelectorAll('.faq-item');
-    
-    faqItems.forEach(item => {
-        const question = item.querySelector('.faq-question');
-        const toggle = item.querySelector('.faq-toggle');
-        
-        question.addEventListener('click', function() {
-            // 关闭其他打开的FAQ项
-            faqItems.forEach(otherItem => {
-                if (otherItem !== item && otherItem.classList.contains('active')) {
-                    otherItem.classList.remove('active');
-                    const otherToggle = otherItem.querySelector('.faq-toggle i');
-                    otherToggle.className = 'fas fa-plus';
-                }
-            });
-            
-            // 切换当前FAQ项
-            item.classList.toggle('active');
-            
-            // 更改图标
-            if (item.classList.contains('active')) {
-                toggle.innerHTML = '<i class="fas fa-minus"></i>';
-            } else {
-                toggle.innerHTML = '<i class="fas fa-plus"></i>';
-            }
-        });
-    });
     
     // 平滑滚动
     const navLinks = document.querySelectorAll('header nav a, .hero-buttons a, .footer-links a');
@@ -914,15 +855,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const nameField = document.getElementById('name');
         const phoneField = document.getElementById('phone');
         const emailField = document.getElementById('email');
-        const addressField = document.getElementById('address');
-        
-        // 为必填字段添加星号标记
-        const requiredLabels = document.querySelectorAll('label[for="name"], label[for="phone"], label[for="email"], label[for="address"]');
-        requiredLabels.forEach(label => {
-            if (!label.innerHTML.includes('*')) {
-                label.innerHTML += ' <span style="color: #e74c3c">*</span>';
-            }
-        });
         
         // 姓名验证
         if (nameField) {
@@ -976,160 +908,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
-        
-        // 地址验证
-        if (addressField) {
-            addressField.addEventListener('blur', function() {
-                if (!this.value.trim()) {
-                    this.style.borderColor = '#e74c3c';
-                    showFieldError(this, 'Shipping address is required');
-                } else {
-                    this.style.borderColor = '#ddd';
-                    removeFieldError(this);
-                }
-            });
-        }
-        
     }
-}
 
-// 显示字段错误提示
-function showFieldError(field, message) {
-    // 移除已有的错误提示
-    removeFieldError(field);
-    
-    // 创建错误提示元素
-    const errorElement = document.createElement('div');
-    errorElement.className = 'field-error';
-    errorElement.textContent = message;
-    
-    // 插入到字段后面
-    field.parentNode.appendChild(errorElement);
-}
-
-// 移除字段错误提示
-function removeFieldError(field) {
-    const errorElement = field.parentNode.querySelector('.field-error');
-    if (errorElement) {
-        errorElement.remove();
-    }
-}
-
-// 添加模态框样式
-document.addEventListener('DOMContentLoaded', function() {
-    // 添加模态框样式
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: none;
-        }
-        
-        .modal.active {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .success-icon {
-            font-size: 48px;
-            color: #2ecc71;
-            margin-bottom: 30px;
-            line-height: 1.5;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        .close-modal {
-            margin-top: 20px;
-        }
-        
-        .close-x {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #999;
-        }
-        
-        .close-x:hover {
-            color: #333;
-        }
-    `;
-    document.head.appendChild(styleElement);
-
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        
-        .modal[style*="display: block"] {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-        }
-        
-        .modal[style*="display: block"] .modal-content {
-            transform: translateY(0);
-        }
-        
-        .success-icon {
-            font-size: 60px;
-            color: #2ecc71;
-            margin-bottom: 20px;
-        }
-        
-        .close-x {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #999;
-        }
-        
-        .close-x:hover {
-            color: #333;
-        }
-    `;
-    document.head.appendChild(styleElement);
-});
-    
     // 返回顶部按钮
     const backToTopBtn = document.createElement('div');
     backToTopBtn.className = 'back-to-top';
@@ -1229,4 +1009,87 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+});
+
+// 显示字段错误提示
+function showFieldError(field, message) {
+    // 移除已有的错误提示
+    removeFieldError(field);
+    
+    // 创建错误提示元素
+    const errorElement = document.createElement('div');
+    errorElement.className = 'field-error';
+    errorElement.textContent = message;
+    
+    // 插入到字段后面
+    field.parentNode.appendChild(errorElement);
+}
+
+// 移除字段错误提示
+function removeFieldError(field) {
+    const errorElement = field.parentNode.querySelector('.field-error');
+    if (errorElement) {
+        errorElement.remove();
+    }
+}
+
+// 添加模态框样式
+document.addEventListener('DOMContentLoaded', function() {
+    // 添加模态框样式
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .success-icon {
+            font-size: 48px;
+            color: #2ecc71;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .close-modal {
+            margin-top: 20px;
+        }
+        
+        .close-x {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .close-x:hover {
+            color: #333;
+        }
+    `;
+    document.head.appendChild(styleElement);
 });
